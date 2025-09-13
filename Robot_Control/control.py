@@ -39,10 +39,10 @@ def movement():
         cmd.linear.x = velocity
     elif left_distance > 11:
         while(yaw > -90):
-            cmd.angular.z = -1.57
+            cmd.angular.z = -0.3
     else:
         while(yaw < 90):
-            cmd.angular.z = 1.57
+            cmd.angular.z = 0.3
     pub.publish(cmd)
 
 
