@@ -10,7 +10,7 @@ cmd = Twist()
 
 kp_rotation = 0.5
 kp_adjust = 1.5
-
+kp_linear = 0
 
 
 def ultrasonics_callback(msg):
@@ -79,7 +79,7 @@ def movement():
     elif forward_distance > 5: #moving state
         target_yaw = yaw_adjust(target_yaw)
         turn(target_yaw)
-        velocity = (forward_distance -5)*0.3 
+        velocity = (forward_distance -5)*kp_linear
         # velocity = max(min(velocity, 5), 5)  # clamp speed to 5
         cmd.linear.x = velocity
     else: #turning state
