@@ -3,7 +3,8 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Int16, Int16MultiArray
 
-forward_distance = right_distance = left_distance = yaw = vision_input = None
+forward_distance = right_distance = left_distance = yaw =  None
+vision_input = ""
 target_yaw = 0
 cmd = Twist()
 
@@ -49,6 +50,11 @@ def new_yaw(target_yaw,vision_input):
         target_yaw -= 90
     else:
         target_yaw += 180 #just in case we go down a dead end
+    if target_yaw > 180:
+        target_yaw -= 360
+    elif target_yaw <-180:
+        target_yaw += 360
+
     return target_yaw
 
 
