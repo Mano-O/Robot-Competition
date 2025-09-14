@@ -3,7 +3,15 @@ import rospy
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Int16, Int16MultiArray
 
-forward_distance = right_distance = left_distance = yaw = None
+forward_distance = right_distance = left_distance = yaw = vision_input = None
+target_yaw = 0
+cmd = Twist()
+
+
+kp_rotation = 0.5
+kp_adjust = 1.5
+
+
 
 def ultrasonics_callback(msg):
     global forward_distance, right_distance, left_distance
@@ -27,28 +35,61 @@ def listener():
     rospy.Subscriber('yaw', Int16, yaw_callback)
     rospy.spin()
 
+
+
+
+def new_yaw(target_yaw,vision_input):
+    if vision_input == "left":
+        target_yaw += 90
+    elif vision_input == "right":
+        target_yaw -= 90
+    if left_distance > 11:
+        target_yaw += 90
+    elif right_distance > 11 :
+        target_yaw -= 90
+    else:
+        target_yaw += 180 #just in case we go down a dead end
+    return target_yaw
+
+
+def turn(target_yaw):
+    error = target_yaw - yaw
+    cmd.angular.z = error*kp_rotation
+
+
+
+def yaw_adjust(target_yaw):
+    error = left_distance - right_distance
+    target_yaw += error*kp_adjust
+    return target_yaw
+
+
+
+
+
+
+
+
 def movement():
-    cmd = Twist()
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
     if forward_distance == None:
         cmd.linear.x = 0
         cmd.angular.z = 0
-    elif forward_distance > 5:
-        # velocity directly proportional to distance, the second term makes the rbot stop at 5cm
-        velocity = forward_distance * 0.3 - 5 * 0.3 # to stop at 5cm
+    elif forward_distance > 5: #moving state
+        target_yaw = yaw_adjust(target_yaw)
+        turn(target_yaw)
+        velocity = (forward_distance -5)*0.3 
         # velocity = max(min(velocity, 5), 5)  # clamp speed to 5
         cmd.linear.x = velocity
-    elif left_distance > 11:
-        while(yaw > -90):
-            cmd.angular.z = -0.3
-    else:
-        while(yaw < 90):
-            cmd.angular.z = 0.3
+    else: #turning state
+        target_yaw = new_yaw(target_yaw, vision_input)
+        turn(target_yaw)
+
     pub.publish(cmd)
 
 
 if __name__ == "__main__":
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     listener()
-
     while not rospy.is_shutdown():
-        pub.publish
+       movement()
