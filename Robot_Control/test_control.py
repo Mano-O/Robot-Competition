@@ -58,20 +58,17 @@ def movement():
         return
 
     # If obstacle ahead
-    if forward_distance < 50:
-        # if left_distance > right_distance:
-            turn_angle(math.pi/2, cmd)   # turn left
-        # else:
-            # turn_angle(-90, cmd)  # turn right
+    if forward_distance < 40:
+        turn_angle(math.pi/2, cmd) # turn left for now, untill we have cv readings
     else:
-        # Move forward slowly if path is clear
-        cmd.linear.x = min(0.2, forward_distance * 0.01)  # proportional, but capped
+        cmd.linear.x = min(0.1, forward_distance * 0.01)
         cmd.angular.z = 0
         pub.publish(cmd)
 
 
 def turn_angle(rotation_angle, cmd):
     """Turn the robot by a relative angle (radians)."""
+    global target_yaw
     start_yaw = yaw
     target_yaw = normalize_angle(start_yaw + rotation_angle)
     rate = rospy.Rate(10)
