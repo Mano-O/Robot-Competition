@@ -71,25 +71,27 @@ def yaw_adjust(target_yaw):
 
 
 def movement():
-    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+
 
     if forward_distance == None:
         cmd.linear.x = 0
         cmd.angular.z = 0
     elif forward_distance > 5: #moving state
-        target_yaw = yaw_adjust(target_yaw)
+
         turn(target_yaw)
         velocity = (forward_distance -5)*kp_linear
         # velocity = max(min(velocity, 5), 5)  # clamp speed to 5
         cmd.linear.x = velocity
     else: #turning state
         target_yaw = new_yaw(target_yaw, vision_input)
+        cmd.linear.x = 0
         turn(target_yaw)
 
     pub.publish(cmd)
 
 
 if __name__ == "__main__":
+    pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
     listener()
     while not rospy.is_shutdown():
        movement()
