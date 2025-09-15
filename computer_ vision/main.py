@@ -1,6 +1,8 @@
 from cv_signs import Sign_Node
 from cv_letters import LetterCollector
 import cv2
+import rospy 
+from std_msgs.msg import String
 
 if __name__ == "__main__":
     sign_model = "/home/rawan/catkin_ws/src/Robot-Competition/models/SignModel.pt"
@@ -19,7 +21,7 @@ if __name__ == "__main__":
     detection_window_name = ""
     confidence_threshold = 0.5
 
-    print("Robot walking... press 'q' to quit.")
+    print("Robot walking ifyou want to finish  press 'q' to quit.")
 
     while True:
         ret, frame = main_cap.read()
